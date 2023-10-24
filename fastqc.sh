@@ -12,4 +12,3 @@ module load fastqc
 
 # Run FastQC
 fastqc -o /home/tly/wgs_pika/results/fastqc/ -t ${SLURM_CPUS_PER_TASK} *.fastq.gz
- 
