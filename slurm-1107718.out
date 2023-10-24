@@ -1,0 +1,14 @@
+/opt/intel/intelpython3/lib/python3.6/site-packages/multiqc/utils/config.py:45: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
+  configs = yaml.load(f)
+/opt/intel/intelpython3/lib/python3.6/site-packages/multiqc/utils/config.py:51: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
+  sp = yaml.load(f)
+[WARNING]         multiqc : MultiQC Version v1.16 now available!
+[INFO   ]         multiqc : This is MultiQC v1.4
+[INFO   ]         multiqc : Template    : default
+[INFO   ]         multiqc : Searching '/home/tly/wgs_pika/results/fastqc/'
+Searching 80 files..
+[INFO   ]          fastqc : Found 40 reports
+[INFO   ]         multiqc : Compressing plot data
+[INFO   ]         multiqc : Report      : multiqc_report.html
+[INFO   ]         multiqc : Data        : multiqc_data
+[INFO   ]         multiqc : MultiQC complete
