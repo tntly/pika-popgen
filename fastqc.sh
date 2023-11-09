@@ -1,11 +1,10 @@
-#!/bin/bash
 #SBATCH --job-name fastqc
 #SBATCH --output fastqc-%j.out
 #SBATCH --cpus-per-task 8
 #SBATCH --mem 10G
 
 # Change directories to where the fastq files are located
-cd /home/tly/wgs-pika/samples
+cd /home/tly/wgs-pika/samples/
 
 # Load modules required for script commands
 module purge
