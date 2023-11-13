@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name fastp
 #SBATCH --output fastp-%j.out
-#SBATCH --ntasks 10
 #SBATCH --cpus-per-task 16
 #SBATCH --mem 100GB
 
@@ -42,5 +41,5 @@ do
   -i $f1 -I $f2 \
   -o $output_f1 -O $output_f2 \
   -j $json -h $html \
-  -w ${SLURM_CPUS_PER_TASK}
+  -w $SLURM_CPUS_PER_TASK
 done
