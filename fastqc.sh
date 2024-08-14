@@ -1,6 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name fastqc
 #SBATCH --output fastqc-%j.out
+#SBATCH --error fastqc-%j.err
+
+#SBATCH --ntasks 1
 #SBATCH --cpus-per-task 16
 #SBATCH --mem 100GB
 

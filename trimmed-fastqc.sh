@@ -5,7 +5,7 @@
 #SBATCH --mem 100GB
 
 # Change directories to where the fastp files are located
-cd /home/tly/wgs-pika/results/trimmed-fastp/
+cd /home/tly/wgs-pika/results/fastp/
 
 # Load modules required for script commands
 module purge
