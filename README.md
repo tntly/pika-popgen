@@ -11,7 +11,7 @@ This repository includes scripts and analyses for investigating local adaptation
 
 ### Part 1: Variant Calling
 
-In this section, we develop a variant calling pipeline. Key steps include:
+In this section, I develop a variant calling pipeline. Key steps include:
 
 1. **Quality Control**:
     - `fastqc`: Assess the quality of raw sequencing data
@@ -40,7 +40,7 @@ In this section, we develop a variant calling pipeline. Key steps include:
 
 ### Part 2: Population Genetics Analyses
 
-Once the variant calling is complete, we perform downstream analyses on the VCF files, including:
+Once the variant calling is complete, I perform downstream analyses on the VCF files, including:
 
 - **Outlier Detection**: Identify genetic loci under selection
 - **Genotype-Environment Associations**: Explore environmental drivers of selection and adaptation
