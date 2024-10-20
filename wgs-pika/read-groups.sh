@@ -1,38 +1,37 @@
 #!/bin/bash
-#SBATCH --job-name AddOrReplaceReadGroups
-#SBATCH --output read_groups-%j.out
-#SBATCH --error read_groups-%j.err
+#SBATCH --job-name read-groups
+#SBATCH --output /home/tly/wgs-pika/modern/scripts/slurm-outputs/read-groups/read-groups-%j.out
+#SBATCH --error /home/tly/wgs-pika/modern/scripts/slurm-outputs/read-groups/read-groups-%j.err
 
 #SBATCH --ntasks 1
-#SBATCH --cpus-per-task 16
-#SBATCH --array 1-20
-
-#SBATCH --mem 100GB
+#SBATCH --cpus-per-task 8
+#SBATCH --array 1-5
+#SBATCH --mem 64GB
 
 # Load modules required for script commands
 module purge
 
 # Change directories to where the sorted bam files are located
-cd /home/tly/wgs-pika/results/sorted-bam/
+cd /home/tly/wgs-pika/modern/results/query-sort/
 
 # Create the sample sheet
 # ls *.bam > samples.txt
 # Define the sample sheet
-samples="/home/tly/wgs-pika/results/sorted-bam/samples.txt"
+samples="/home/tly/wgs-pika/modern/results/query-sort/samples.txt"
 
 # Define the output directory
-output_dir="/home/tly/wgs-pika/results/read-groups/"
+output_dir="/home/tly/wgs-pika/modern/results/read-groups/"
 
 # Get the file names
-# trimmed_27552_S1_sort.bam
+# trimmed_CUMV_20322_QS.bam
 f=$(sed -n "$SLURM_ARRAY_TASK_ID"p $samples)
 echo $f
 
 # Extract the sample names
-# trimmed_27552_S1
-name=$(echo $f | sed 's/_sort.bam//')
+# ttrimmed_CUMV_20322
+name=$(echo $f | sed 's/_QS.bam//')
 echo $name
-# S1
+# 20322
 SM=$(echo $name | awk -F_ '{print $NF}')
 echo $SM
 
