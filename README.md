@@ -1,11 +1,11 @@
-# Studying Local Adaptations in American Pikas: Variant Calling and Population Genetics  Analyses
+# Studying Local Adaptations in American Pikas: Variant Calling and Population Genomics Analyses
 
 > Author: Tien Ly  
-> Updated: October 2024
+> Updated: January 2025
 
 ## 🚧 Under Construction 🚧
 
-This repository includes scripts and analyses for investigating local adaptations in American pikas as part of my MS Bioinformatics thesis project at San Jose State University. The project is structured into two main components: variant calling and population genetics analyses.
+This repository includes scripts and analyses for investigating local adaptations in American pikas as part of my MS Bioinformatics thesis project at San Jose State University. The project is structured into two main components: variant calling and population genomics analyses.
 
 ## Project Overview
 
@@ -38,9 +38,9 @@ In this section, I develop a variant calling pipeline. Key steps include:
 #### Additional Files
 - Create `.dict` and `.fai` files for the reference genome as required for downstream analysis
 
-### Part 2: Population Genetics Analyses
+### Part 2: Population Genomics Analyses
 
-Once the variant calling is complete, I perform downstream analyses on the VCF files, including:
+Once the variant calling is complete, I perform downstream statistical analyses on the VCF files, including:
 
-- **Outlier Detection**: Identify genetic loci under selection
-- **Genotype-Environment Associations**: Explore environmental drivers of selection and adaptation
+- **Outlier Detection**: Identify genetic loci under selection using pcadapt and BayeScan
+- **Genotype-Environment Associations**: Explore environmental drivers of selection and adaptation using RDA and BayPass
