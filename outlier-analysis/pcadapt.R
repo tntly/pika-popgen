@@ -1,83 +1,92 @@
-# --- INSTALL REQUIRED PACKAGES ---
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
-}
-if (!requireNamespace("pcadapt", quietly = TRUE)) {
-  install.packages("pcadapt")
-}
-# answer "yes" twice regarding a personal library if asked
-# choose OH as the mirror by entering the appropriate number when prompted
+# --------------------------- #
+# pcadapt Outlier Detection Pipeline (R)
+# --------------------------- #
+# This script performs a PCA-based outlier detection using the pcadapt R package.
+# It includes PCA analysis, visualization, and outlier detection with Bonferroni correction.
+#
+# Requirements:
+# - R with the pcadapt package installed
+#
+# Data:
+# - BED file: pika_73ind_4.8Msnp_10pop.bed
+# - Metadata file: pika_10pop_metadata.txt
+# --------------------------- #
 
-# Load the necessary libraries for the analysis
+# Load required libraries
 library(pcadapt)
 
-# --- PCA ANALYSIS ---
-# pcadapt uses an ordination approach to find sites in a data set that are outliers with respect to background population structure
+# Load genotype data from the BED file
+pika_bed <- "../data/pika_73ind_4.8Msnp_10pop.bed"
+pika_pcadapt <- read.pcadapt(pika_bed, type = "bed")
 
-# Load in the data
-pikas_bed <- "/home/tly/outlier-analysis/data/Final_CtoT_GtoA_SNP.bed"
-pikas_pcadapt <- read.pcadapt(pikas_bed, type = "bed")
-
-# Run PCA analysis with K = 5 principal components
-pikas_pcadapt_pca <- pcadapt(input = pikas_pcadapt, K = 5)
+# --------------------------- #
+# Perform PCA analysis
+# --------------------------- #
+# Run PCA with 5 principal components
+pika_pcadapt_pca <- pcadapt(input = pika_pcadapt, K = 5)
 print("Summary of PCA results:")
-summary(pikas_pcadapt_pca)
+summary(pika_pcadapt_pca)
 
-# --- PLOTS ---
-
+# --------------------------- #
+# Generate plots
+# --------------------------- #
 # Scree plot: visualize variance explained by each principal component
-png("/home/tly/outlier-analysis/results/pcadapt/pcadapt_pikas_k5plot.png")
-plot(pikas_pcadapt_pca, option = "screeplot")  
+png("pcadapt-results/pika_pcadapt_screeplot_k5.png", width = 10, height = 10, units = "in", res = 300)
+plot(pika_pcadapt_pca, option = "screeplot")  
 dev.off()
-print("Scree plot saved as pcadapt_pikas_k5plot.png")
+print("Scree plot saved")
 
-# Score plot: investigate axis projections
 # Load population metadata
-metadata <- read.table("/home/tly/outlier-analysis/data/pika_10populations_metadata.txt", header = FALSE)
-poplist.names <- metadata[, 2]
-print("Population metadata loaded:")
-print(poplist.names)
+metadata <- read.table("../data/pika_10pop_metadata.txt", header = FALSE)
+pop_ids <- metadata[, 2]
 
-# Projections of individuals on the first 2 principal components
-png("/home/tly/outlier-analysis/results/pcadapt/pcadapt_pikas_projection1v2.png")
-plot(pikas_pcadapt_pca, option = "scores", i = 1, j = 2, pop = poplist.names)
+# Score plot for the first two PCs
+png("pcadapt-results/pika_pcadapt_projection1v2.png", width = 10, height = 10, units = "in", res = 300)
+plot(pika_pcadapt_pca, option = "scores", i = 1, j = 2, pop = pop_ids)
 dev.off()
-print("Score plot (PC1 vs PC2) saved as pcadapt_pikas_projection1v2.png")
+print("Score plot (PC1 vs PC2) saved")
 
-# Projections of individuals on the 4th and 5th components
-png("/home/tly/outlier-analysis/results/pcadapt/pcadapt_starlings_projection4v5.png")
-plot(pikas_pcadapt_pca, option = "scores", i = 4, j = 5, pop = poplist.names)
+# Score plot for the fourth and fifth PCs
+png("pcadapt-results/pika_pcadapt_projection4v5.png", width = 10, height = 10, units = "in", res = 300)
+plot(pika_pcadapt_pca, option = "scores", i = 4, j = 5, pop = pop_ids)
 dev.off()
-print("Score plot (PC4 vs PC5) saved as pcadapt_starlings_projection4v5.png")
+print("Score plot (PC4 vs PC5) saved")
 
 # Manhattan plot: visualize p-values across the genome
-png("/home/tly/outlier-analysis/results/pcadapt/pcadapt_pikas_manhattan.png")
-plot(pikas_pcadapt_pca, option = "manhattan")
+png("pcadapt-results/pika_pcadapt_manhattan.png", width = 10, height = 10, units = "in", res = 300)
+plot(pika_pcadapt_pca, option = "manhattan")
 dev.off()
-print("Manhattan plot saved as pcadapt_pikas_manhattan.png")
+print("Manhattan plot saved")
 
 # Q-Q plot: visualize the distribution of p-values
-png("/home/tly/outlier-analysis/results/pcadapt/pcadapt_pikas_qqplot.png")
-plot(pikas_pcadapt_pca, option = "qqplot")
+png("pcadapt-results/pika_pcadapt_qqplot.png", width = 10, height = 10, units = "in", res = 300)
+plot(pika_pcadapt_pca, option = "qqplot")
 dev.off()
-print("Q-Q plot saved as pcadapt_pikas_qqplot.png")
+print("Q-Q plot saved")
 
 # Histogram of p-values: assess uniformity of distribution
-png("/home/tly/outlier-analysis/results/pcadapt/pcadapt_pikas_pvalues.png")
-hist(pikas_pcadapt_pca$pvalues, xlab = "p-values", main = NULL, breaks = 50, col = "orange")
+png("pcadapt-results/pika_pcadapt_pvalues_hist.png", width = 10, height = 10, units = "in", res = 300)
+hist(pika_pcadapt_pca$pvalues, xlab = "p-values", main = NULL, breaks = 50, col = "orange")
 dev.off()
-print("Histogram of p-values saved as pcadapt_pikas_pvalues.png")
+print("Histogram of p-values saved")
 
-# --- IDENTIFY OUTLIERS ---
+# Test statistic distribution: assess the distribution of test statistics
+png("pcadapt-results/pika_pcadapt_stat_dist.png", width = 10, height = 10, units = "in", res = 300)
+plot(pika_pcadapt_pca, option = "stat.distribution")
+dev.off()
+print("Distribution of test statistics saved")
 
+# --------------------------- #
+# Identify outliers
+# --------------------------- #
 # Adjust p-values using Bonferroni correction
-pikas_pcadapt_padj <- p.adjust(pikas_pcadapt_pca$pvalues, method = "bonferroni")
-# Set significance threshold for outlier detection
-alpha <- 0.05
-outliers <- which(pikas_pcadapt_padj < alpha)
-
+pika_pcadapt_padj <- p.adjust(pika_pcadapt_pca$pvalues, method = "bonferroni")
+alpha <- 0.01  # Significance threshold for outlier detection
+outliers <- which(pika_pcadapt_padj < alpha)
 print("Number of outliers found:")
 length(outliers)
 
-write.table(outliers, file = "/home/tly/outlier-analysis/results/pcadapt/pikas_pcadapt_outliers.txt")
-print("Outliers saved to pikas_pcadapt_outliers.txt")
+# Save outliers to a file
+write.table(outliers, file = "pcadapt-results/pika_pcadapt_outliers.txt", 
+            row.names = FALSE, col.names = FALSE, quote = FALSE)
+print("Outliers saved to pika_pcadapt_outliers.txt")

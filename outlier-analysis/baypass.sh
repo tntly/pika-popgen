@@ -2,6 +2,7 @@
 #SBATCH --job-name=baypass
 #SBATCH --output=slurmout/baypass-%j.out
 #SBATCH --error=slurmout/baypass-%j.err
+
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
@@ -15,13 +16,14 @@
 # Requirements: PLINK, BayPass
 #
 # Data:
-# - VCF file: pika_73ind_4.8Msnp_10pop.vcf
+# - PED file: pika_73ind_4.8Msnp_10pop.ped
 # - Metadata file: pika_10pop_metadata.txt
 # --------------------------- #
 
 # --------------------------- #
 # Prepare input files
 # --------------------------- #
+# Set working directory
 DIR=~/outlier-analysis
 cd $DIR/baypass
 
@@ -42,14 +44,14 @@ cp $DIR/data/pika_73ind_4.8Msnp_10pop.log .
 # Calculate allele frequencies Using PLINK
 ~/programs/plink_linux_x86_64_20240818/plink \
   --file pika_73ind_4.8Msnp_10pop \
-  --allow-extra-chr \
-  --freq --family \
+  --allow-extra-chr --freq --family \
   --out pika_73ind_4.8Msnp_10pop
 
 # Convert PLINK output to BayPass format
 # - Extract relevant columns and format allele counts
 # - Each population's reference and alternative allele counts are processed
 # - Output a single file formatted for BayPass
+echo "Creating genotype data file in Baypass format..."
 tail -n +2 pika_73ind_4.8Msnp_10pop.frq.strat | \
   awk '{$9 = $8 - $7} 1' | \
   awk '{print $7, $9}' | \
@@ -57,8 +59,7 @@ tail -n +2 pika_73ind_4.8Msnp_10pop.frq.strat | \
   sed 's/ /\n/20; P; D' > pika_10pop_geno_baypass.txt
 
 # --------------------------- #
-# Run BayPass core model
-# to generate covariance matrix
+# Run BayPass core model to generate covariance matrix
 # --------------------------- #
 ~/programs/baypass_public-master/sources/g_baypass \
   -npop 10 \
