@@ -1,5 +1,5 @@
 # --------------------------- #
-# pcadapt Outlier Detection Pipeline (R)
+# pcadapt Outlier Detection (R)
 # --------------------------- #
 # This script performs a PCA-based outlier detection using the pcadapt R package.
 # It includes PCA analysis, visualization, and outlier detection with Bonferroni correction.
@@ -12,16 +12,19 @@
 # - Metadata file: pika_10pop_metadata.txt
 # --------------------------- #
 
+# --------------------------- #
+# Environment setup
+# --------------------------- #
 # Load required libraries
 library(pcadapt)
-
-# Load genotype data from the BED file
-pika_bed <- "../data/pika_73ind_4.8Msnp_10pop.bed"
-pika_pcadapt <- read.pcadapt(pika_bed, type = "bed")
 
 # --------------------------- #
 # Perform PCA analysis
 # --------------------------- #
+# Load genotype data from the BED file
+pika_bed <- "../data/pika_73ind_4.8Msnp_10pop.bed"
+pika_pcadapt <- read.pcadapt(pika_bed, type = "bed")
+
 # Run PCA with 5 principal components
 pika_pcadapt_pca <- pcadapt(input = pika_pcadapt, K = 5)
 print("Summary of PCA results:")
@@ -81,12 +84,12 @@ print("Distribution of test statistics saved")
 # --------------------------- #
 # Adjust p-values using Bonferroni correction
 pika_pcadapt_padj <- p.adjust(pika_pcadapt_pca$pvalues, method = "bonferroni")
-alpha <- 0.01  # Significance threshold for outlier detection
+alpha <- 0.01   # Significance threshold for outlier detection
 outliers <- which(pika_pcadapt_padj < alpha)
 print("Number of outliers found:")
 length(outliers)
 
 # Save outliers to a file
 write.table(outliers, file = "pcadapt-results/pika_pcadapt_outliers.txt", 
-            row.names = FALSE, col.names = FALSE, quote = FALSE)
+            row.names = FALSE, col.names = FALSE)
 print("Outliers saved to pika_pcadapt_outliers.txt")

@@ -9,15 +9,15 @@
 #SBATCH --mem=64GB
 
 # --------------------------- #
-# BayPass Analysis Pipeline
+# BayPass Analysis
 # --------------------------- #
-# This script prepares genetic data and runs BayPass for genotype-environment association analysis
+# This script prepares genetic data and runs BayPass for genotype-environment association analysis.
 #
 # Requirements: PLINK, BayPass
 #
 # Data:
 # - PED file: pika_73ind_4.8Msnp_10pop.ped
-# - Metadata file: pika_10pop_metadata.txt
+# - Metadata files: pika_10pop_metadata.txt, pika_10pop_SNPs.txt
 # - Environmental data files: pika_10pop_env1_baypass.txt, pika_10pop_env2_baypass.txt
 # --------------------------- #
 
@@ -25,7 +25,7 @@
 # Prepare genotype data file
 # --------------------------- #
 # Set working directory
-DIR=~/outlier-analysis
+DIR=~/selection-analysis
 cd $DIR/baypass
 
 # Reorder metadata columns to match PLINK format (POP first, IND second)
@@ -96,6 +96,7 @@ tail -n +2 pika_73ind_4.8Msnp_10pop.frq.strat | \
 # Filter outliers with estimated Bayes Factors > 25
 # --------------------------- #
 # Filter outliers for GEA analysis 1
+echo "Filtering outliers with Bayes Factors > 25..."
 cat baypass-results/pika_10pop_baypass_gea1_summary_betai.out | \
   awk '$6 > 25' > baypass-results/pika_baypass_gea1_BF25.txt
 
@@ -107,6 +108,7 @@ cat baypass-results/pika_10pop_baypass_gea2_summary_betai.out | \
 # Identify outlier SNP IDs
 # --------------------------- #
 # Match filtered outliers from GEA 1 with SNP IDs
+echo "Matching outlier SNP line numbers with SNP IDs..."
 awk 'FNR == NR {a[$2]; next} (($4) in a)' \
   baypass-results/pika_baypass_gea1_BF25.txt \
   $DIR/data/pika_10pop_SNPs.txt | \

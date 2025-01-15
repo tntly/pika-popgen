@@ -9,9 +9,9 @@
 #SBATCH --mem=64GB
 
 # --------------------------- #
-# pcadapt Outlier Detection Pipeline
+# pcadapt Outlier Detection
 # --------------------------- #
-# This script prepares genomic data and runs the pcadapt R package for outlier detection
+# This script prepares genomic data and runs the pcadapt R package for outlier detection.
 #
 # Requirements: PLINK, R
 #
@@ -29,14 +29,13 @@ source ~/.bashrc
 conda activate pika
 
 # Set working directory
-DIR=~/outlier-analysis
+DIR=~/selection-analysis
 cd $DIR/pcadapt
 
 # --------------------------- #
-# Prepare genotype data
+# Prepare genotype data file
 # --------------------------- #
 # Convert VCF to BED format using PLINK if necessary
-# Uncomment if needed
 # zcat $DIR/data/pika_73ind_4.8Msnp_10pop.vcf.gz > $DIR/data/pika_73ind_4.8Msnp_10pop.vcf
 # ~/programs/plink_linux_x86_64_20240818/plink \
 #   --vcf $DIR/data/pika_73ind_4.8Msnp_10pop.vcf \
@@ -57,11 +56,11 @@ Rscript pcadapt.R
 echo "Extracting non-header lines from VCF and formatting for SNP IDs..."
 grep -v "^#" $DIR/data/pika_73ind_4.8Msnp_10pop.vcf | \
   cut -f 1-3 | \
-  awk '{print $0 "\t" NR}' > pika_10pop_SNPs.txt
+  awk '{print $0 "\t" NR}' > $DIR/data/pika_10pop_SNPs.txt
 
 # Match outlier SNP line numbers with corresponding SNP IDs
 echo "Matching outlier SNP line numbers with SNP IDs..."
 awk 'FNR == NR {a[$1]; next} (($4) in a)' \
   pcadapt-results/pika_pcadapt_outliers.txt \
-  pika_10pop_SNPs.txt | \
-  cut -f 3 > pcadapt-results/pika_pcadapt_outlier_SNPs.txt
+  $DIR/data/pika_10pop_SNPs.txt | \
+  cut -f 3 > pcadapt-results/pika_pcadapt_outlier_SNPIDs.txt
