@@ -9,7 +9,7 @@
 #SBATCH --mem=64GB
 
 # --------------------------- #
-# BayeScan2 Analysis
+# BayeScan Analysis
 # --------------------------- #
 # This script processes BayeScan results and extracts outlier SNPs.
 #
@@ -24,12 +24,13 @@
 source ~/.bashrc
 conda activate pika
 
-# --------------------------- #
-# Organize FST files
-# --------------------------- #
+# Set working directory
 DIR=~/selection-analysis
 cd $DIR/bayescan
 
+# --------------------------- #
+# Organize FST files
+# --------------------------- #
 dest_dir=bayescan1-results-fst
 mv bayescan1-results1/*.g_fst.txt $dest_dir
 mv bayescan1-results2/*.g_fst.txt $dest_dir
@@ -52,8 +53,9 @@ num_subsamples=$(wc -l < subsamples.txt)
 
 for ((i = 1; i <= num_subsamples; i++)); do
     f=$(sed -n "${i}p" subsamples.txt)
+    subsample_num=$(echo $f | grep -o '[0-9]\+')
     echo "Processing VCF file: $f"
-    grep -v "^#" $f | cut -f 1-3 | awk '{print $0 "\t" NR}' > ../pika-SNPs-70-subsamples/pika_SNPs_subsample_${i}.txt
+    grep -v "^#" $f | cut -f 1-3 | awk '{print $0 "\t" NR}' > ../pika-SNPs-70-subsamples/pika_SNPs_subsample_${subsample_num}.txt
 done
 
 # --------------------------- #
@@ -68,9 +70,10 @@ subsamples_SNPs=$DIR/vcf-subsample/pika-SNPs-70-subsamples/subsamples.txt
 for ((i = 1; i <= num_subsamples; i++)); do
   f1_outliers=$(sed -n "${i}p" subsamples.txt)
   f2_SNPs=$(sed -n "${i}p" $subsamples_SNPs)
+  subsample_num=$(echo $f1_outliers | grep -o '[0-9]\+')
   echo "Matching files: $f1_outliers and $f2_SNPs"
   awk 'FNR == NR {a[$1]; next} (($4) in a)' $f1_outliers $f2_SNPs | \
-    cut -f 3 > ../bayescan2-outlier-SNPIDs/pika_bayescan_outlier_SNPIDs_${i}.txt
+    cut -f 3 > ../bayescan2-outlier-SNPIDs/pika_bayescan_outlier_SNPIDs_${subsample_num}.txt
 done
 
 # Merge all outlier SNP IDs
