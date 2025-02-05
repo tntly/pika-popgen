@@ -9,7 +9,7 @@
 #SBATCH --mem=64GB
 
 # --------------------------- #
-# pcadapt Outlier Detection
+# pcadapt Analysis
 # --------------------------- #
 # This script prepares genomic data and runs the pcadapt R package for outlier detection.
 #

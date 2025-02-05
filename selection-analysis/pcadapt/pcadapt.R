@@ -2,10 +2,10 @@
 # pcadapt Outlier Detection (R)
 # --------------------------- #
 # This script performs a PCA-based outlier detection using the pcadapt R package.
-# It includes PCA analysis, visualization, and outlier detection with Bonferroni correction.
+# It includes PCA analysis, visualization, and outlier detection with q-values.
 #
 # Requirements:
-# - R with the pcadapt package installed
+# - R with the pcadapt and qvalue packages installed
 #
 # Data:
 # - BED file: pika_73ind_4.8Msnp_10pop.bed
@@ -17,6 +17,7 @@
 # --------------------------- #
 # Load required libraries
 library(pcadapt)
+library(qvalue)
 
 # --------------------------- #
 # Perform PCA analysis
@@ -25,9 +26,16 @@ library(pcadapt)
 pika_bed <- "../data/pika_73ind_4.8Msnp_10pop.bed"
 pika_pcadapt <- read.pcadapt(pika_bed, type = "bed")
 
+# Run PCA with 20 principal components to determine the number of PCs to retain
+pika_pcadapt_pca <- pcadapt(input = pika_pcadapt, K = 20)
+png("pcadapt-results/pika_pcadapt_screeplot_k20.png", width = 10, height = 10, units = "in", res = 300)
+plot(pika_pcadapt_pca, option = "screeplot")  
+dev.off()
+print("Scree plot (K = 20) saved")
+
 # Run PCA with 5 principal components
 pika_pcadapt_pca <- pcadapt(input = pika_pcadapt, K = 5)
-print("Summary of PCA results:")
+print("Summary of pcadapt results:")
 summary(pika_pcadapt_pca)
 
 # --------------------------- #
@@ -37,7 +45,7 @@ summary(pika_pcadapt_pca)
 png("pcadapt-results/pika_pcadapt_screeplot_k5.png", width = 10, height = 10, units = "in", res = 300)
 plot(pika_pcadapt_pca, option = "screeplot")  
 dev.off()
-print("Scree plot saved")
+print("Scree plot (K = 5) saved")
 
 # Load population metadata
 metadata <- read.table("../data/pika_10pop_metadata.txt", header = FALSE)
@@ -47,13 +55,13 @@ pop_ids <- metadata[, 2]
 png("pcadapt-results/pika_pcadapt_projection1v2.png", width = 10, height = 10, units = "in", res = 300)
 plot(pika_pcadapt_pca, option = "scores", i = 1, j = 2, pop = pop_ids)
 dev.off()
-print("Score plot (PC1 vs PC2) saved")
+print("Score plot (PC1 vs. PC2) saved")
 
 # Score plot for the fourth and fifth PCs
 png("pcadapt-results/pika_pcadapt_projection4v5.png", width = 10, height = 10, units = "in", res = 300)
 plot(pika_pcadapt_pca, option = "scores", i = 4, j = 5, pop = pop_ids)
 dev.off()
-print("Score plot (PC4 vs PC5) saved")
+print("Score plot (PC4 vs. PC5) saved")
 
 # Manhattan plot: visualize p-values across the genome
 png("pcadapt-results/pika_pcadapt_manhattan.png", width = 10, height = 10, units = "in", res = 300)
@@ -82,10 +90,16 @@ print("Distribution of test statistics saved")
 # --------------------------- #
 # Identify outliers
 # --------------------------- #
-# Adjust p-values using Bonferroni correction
-pika_pcadapt_padj <- p.adjust(pika_pcadapt_pca$pvalues, method = "bonferroni")
+# Transforms p-values into q-values
+# pika_pcadapt_padj <- p.adjust(pika_pcadapt_pca$pvalues, method = "bonferroni")
+# alpha <- 0.01   # Significance threshold for outlier detection
+# outliers <- which(pika_pcadapt_padj < alpha)
+# print("Number of outliers found:")
+# length(outliers)
+
+pika_pcadapt_qval <- qvalue(pika_pcadapt_pca$pvalues)$qvalues
 alpha <- 0.01   # Significance threshold for outlier detection
-outliers <- which(pika_pcadapt_padj < alpha)
+outliers <- which(pika_pcadapt_qval < alpha)
 print("Number of outliers found:")
 length(outliers)
 
