@@ -91,12 +91,6 @@ print("Distribution of test statistics saved")
 # Identify outliers
 # --------------------------- #
 # Transforms p-values into q-values
-# pika_pcadapt_padj <- p.adjust(pika_pcadapt_pca$pvalues, method = "bonferroni")
-# alpha <- 0.01   # Significance threshold for outlier detection
-# outliers <- which(pika_pcadapt_padj < alpha)
-# print("Number of outliers found:")
-# length(outliers)
-
 pika_pcadapt_qval <- qvalue(pika_pcadapt_pca$pvalues)$qvalues
 alpha <- 0.01   # Significance threshold for outlier detection
 outliers <- which(pika_pcadapt_qval < alpha)
