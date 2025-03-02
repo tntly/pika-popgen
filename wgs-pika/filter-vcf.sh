@@ -12,8 +12,9 @@
 # VCF Filtering Pipeline
 # --------------------------- #
 # This script filters a VCF file to retain only high-quality SNPs
-# by applying various filtering criteria, including biallelic filtering,
-# missing genotype removal, allele frequency filtering, and SNP ID annotation.
+# by applying various filtering criteria, including variant quality filtering,
+# biallelic filtering, missing genotype removal, allele frequency filtering,
+# and SNP ID annotation.
 #
 # Requirements: BCFtools, GATK
 # --------------------------- #
@@ -23,6 +24,15 @@
 # --------------------------- #
 source ~/.bashrc
 conda activate pika
+
+# --------------------------- #
+# Step 0: Filter variants based on metrics
+# --------------------------- #
+~/programs/gatk-4.4.0.0/gatk SelectVariants -R ~/wgs-pika/reference/GCA_014633375.1_OchPri4.0_genomic.fna \
+    -V ~/wgs-pika/genotype/pika_10pop.vcf.gz \
+    -select "QD > 2.0 && FS < 30.0 && SOR < 4.0 && MQ > 50.0 && MQRankSum > -5.0 && ReadPosRankSum > -4.0" \
+    --select-type-to-include SNP \
+    -O 0_variantcullSNP.vcf.gz
 
 # --------------------------- #
 # Step 1: Keep only biallelic SNPs
