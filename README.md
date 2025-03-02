@@ -1,7 +1,7 @@
 # Studying Local Adaptations in American Pikas: Variant Calling and Population Genomics Analyses
 
 > Author: Tien Ly  
-> Updated: January 2025
+> Updated: March 2025
 
 ## 🚧 Under Construction 🚧
 
@@ -34,6 +34,10 @@ In this section, I develop a variant calling pipeline. Key steps include:
    
 5. **Haplotype Calling**:
     - `haplotype.sh`: Call haplotypes from the sorted BAM files to identify variant sites
+
+6. **Genotyping and Variant Filtering**:
+    - `genotype.sh`: Aggregate per-sample variant data and genotype the samples
+    - `filter-vcf.sh`: Apply quality-based filtering to retain high-confidence variants
 
 #### Additional Files
 - Create `.dict` and `.fai` files for the reference genome as required for downstream analysis
