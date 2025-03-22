@@ -40,7 +40,8 @@ In this section, I develop a variant calling pipeline. Key steps include:
     - `filter-vcf.sh`: Apply quality-based filtering to retain high-confidence variants
 
 #### Additional Files
-- Create `.dict` and `.fai` files for the reference genome as required for downstream analysis
+- Create `.dict` and `.fai` files for the reference genome
+    - `samtools faidx GCA_014633375.1_OchPri4.0_genomic.fna`
 
 ### Part 2: Population Genomics Analyses
 
