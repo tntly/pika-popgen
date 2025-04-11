@@ -17,10 +17,12 @@
 # Requirements: bcftools, bedtools
 #
 # Data:
-# - UCSC alias file: GCF_014633375.1.chromAlias.txt
 # - VCF: pika_73ind_4.8Msnp_10pop.vcf
-# - Outlier SNP list: double_outliers.txt
+# - Outlier SNP lists:
+#   - pcadapt_bayescan_overlapping_outliers.txt
+#   - baypass_rda_overlapping_outliers.txt
 # - GFF: GCF_014633375.1_OchPri4.0_genomic.gff
+# - UCSC alias: GCF_014633375.1.chromAlias.txt
 # --------------------------- #
 
 # --------------------------- #
@@ -36,42 +38,52 @@ DIR=~/go-analysis
 cd $DIR/snps-to-genes
 
 # --------------------------- #
-# Download and process UCSC chromosome alias file
+# Download and process chromosome alias file
 # --------------------------- #
-# For Ochotona princeps genome (OchPri4.0)
+echo "Downloading UCSC chromosome alias file..."
 wget "https://hgdownload.soe.ucsc.edu/hubs/GCF/014/633/375/GCF_014633375.1/GCF_014633375.1.chromAlias.txt"
 
-# Extract first column (RefSeq ID) and third column (GenBank ID)
+# Create GenBank-to-RefSeq alias mapping
 tail -n +3 GCF_014633375.1.chromAlias.txt | awk '{print $3 "\t" $1}' > OchPri4.0_genbank_to_refseq_chromAlias.txt
-# Convert alias file into sed substitution format
 sed 's@\(.*\)\t\(.*\)@s/\1/\2/g@' OchPri4.0_genbank_to_refseq_chromAlias.txt > OchPri4.0_genbank_to_refseq_chromAlias.sed.txt
 
 # --------------------------- #
-# Extract and process SNPs
+# Extract outlier SNPs from VCF
 # --------------------------- #
-# Extract outlier SNPs
-bcftools view --include 'ID=@~/selection-analysis/summary/summary-results/double_outliers.txt' \
-    ~/selection-analysis/data/pika_73ind_4.8Msnp_10pop.vcf > pika_outlier_snps_genbank.vcf
+echo "Extracting outlier SNPs..."
+bcftools view --include 'ID=@~/selection-analysis/summary/summary-results/pcadapt_bayescan_overlapping_outliers.txt' \
+    ~/selection-analysis/data/pika_73ind_4.8Msnp_10pop.vcf > pika_outlier_snps_genbank_pcadapt_bayescan.vcf
 
-# Convert GenBank IDs to RefSeq in SNP VCF
-sed -f OchPri4.0_genbank_to_refseq_chromAlias.sed.txt pika_outlier_snps_genbank.vcf > pika_outlier_snps_refseq.vcf
-
-# Convert entire VCF from GenBank to RefSeq
-sed -f OchPri4.0_genbank_to_refseq_chromAlias.sed.txt ~/selection-analysis/data/pika_73ind_4.8Msnp_10pop.vcf > \
-    pika_73ind_4.8Msnp_10pop_refseq.vcf
+bcftools view --include 'ID=@~/selection-analysis/summary/summary-results/baypass_rda_overlapping_outliers.txt' \
+    ~/selection-analysis/data/pika_73ind_4.8Msnp_10pop.vcf > pika_outlier_snps_genbank_baypass_rda.vcf
 
 # --------------------------- #
-# Process GFF for gene annotations
+# Convert chromosome IDs to RefSeq
 # --------------------------- #
+echo "Converting GenBank IDs to RefSeq IDs..."
+sed -f OchPri4.0_genbank_to_refseq_chromAlias.sed.txt pika_outlier_snps_genbank_pcadapt_bayescan.vcf > pika_outlier_snps_refseq_pcadapt_bayescan.vcf
+sed -f OchPri4.0_genbank_to_refseq_chromAlias.sed.txt pika_outlier_snps_genbank_baypass_rda.vcf > pika_outlier_snps_refseq_baypass_rda.vcf
+sed -f OchPri4.0_genbank_to_refseq_chromAlias.sed.txt ~/selection-analysis/data/pika_73ind_4.8Msnp_10pop.vcf > pika_73ind_4.8Msnp_10pop_refseq.vcf
+
+# --------------------------- #
+# Extract protein-coding genes from GFF
+# --------------------------- #
+echo "Filtering GFF for protein-coding genes..."
 awk -F '\t' '$0 !~ /^#/ && $3 == "gene" && $9 ~ /gene_biotype=protein_coding/' \
     $DIR/data/GCF_014633375.1_OchPri4.0_genomic.gff > GCF_014633375.1_OchPri4.0_genomic_gene_only.gff
 
 # --------------------------- #
 # SNP-to-Gene association
 # --------------------------- #
-# Genes near outlier SNPs
+echo "Identifying genes near outlier and all SNPs..."
+
+# Genes near pcadapt & BayeScan outlier SNPs
 bedtools window -a pika_outlier_snps_refseq.vcf -b GCF_014633375.1_OchPri4.0_genomic_gene_only.gff -w 20000 | \
-    awk '{print $(NF)}' | cut -d ';' -f 3 | cut -d '=' -f 2 | sort -u > pika_outlier_genes_20kb.txt
+    awk '{print $(NF)}' | cut -d ';' -f 3 | cut -d '=' -f 2 | sort -u > pika_outlier_genes_20kb_pcadapt_bayescan.txt
+
+# Genes near BayPass & RDA outlier SNPs
+bedtools window -a pika_outlier_snps_refseq_baypass_rda.vcf -b GCF_014633375.1_OchPri4.0_genomic_gene_only.gff -w 20000 | \
+    awk '{print $(NF)}' | cut -d ';' -f 3 | cut -d '=' -f 2 | sort -u > pika_outlier_genes_20kb_baypass_rda.txt
 
 # Genes near all SNPs
 bedtools window -a pika_73ind_4.8Msnp_10pop_refseq.vcf -b GCF_014633375.1_OchPri4.0_genomic_gene_only.gff -w 20000 | \
