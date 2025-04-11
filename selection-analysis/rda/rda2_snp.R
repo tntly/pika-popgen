@@ -92,7 +92,18 @@ table(pika_rda_outliers_df$predictor)
 # --------------------------- #
 # Save Results
 # --------------------------- #
+# Save annotated outlier SNPs to file
 write.table(pika_rda_outliers_df,
             file = "rda-results/pika_rda_outliers_2.txt",
             sep = "\t", row.names = FALSE, quote = FALSE)
 print("Saved: pika_rda_outliers_2.txt")
+
+# Save SNP IDs associated with vpdmin_min
+vpdmin_snps <- pika_rda_outliers_df %>%
+    filter(predictor == "vpdmin_min") %>%
+    pull(snp_id)
+
+write.table(vpdmin_snps,
+            file = "rda-results/pika_rda_2_vpdmin_min_outlier_SNPIDs.txt",
+            row.names = FALSE, col.names = FALSE, quote = FALSE)
+print("Saved: pika_rda_2_vpdmin_min_outlier_SNPIDs.txt")
