@@ -13,5 +13,8 @@
 source ~/.bashrc
 conda activate pika
 
-# Execute R script for RDA analysis
+# Execute R scripts for RDA analysis
 Rscript rda1.R
+Rscript rda1_snp.R
+Rscript rda2.R
+Rscript rda2_snp.R
