@@ -18,6 +18,7 @@
 # Load required libraries
 library(pcadapt)
 library(qvalue)
+library(ggplot2)
 
 # --------------------------- #
 # Perform PCA analysis
@@ -29,7 +30,7 @@ pika_pcadapt <- read.pcadapt(pika_bed, type = "bed")
 # Run PCA with 20 principal components to determine the number of PCs to retain
 pika_pcadapt_pca <- pcadapt(input = pika_pcadapt, K = 20)
 png("pcadapt-results/pika_pcadapt_screeplot_k20.png", width = 10, height = 10, units = "in", res = 300)
-plot(pika_pcadapt_pca, option = "screeplot")  
+plot(pika_pcadapt_pca, option = "screeplot")
 dev.off()
 print("Scree plot (K = 20) saved")
 
@@ -43,7 +44,7 @@ summary(pika_pcadapt_pca)
 # --------------------------- #
 # Scree plot: visualize variance explained by each principal component
 png("pcadapt-results/pika_pcadapt_screeplot_k5.png", width = 10, height = 10, units = "in", res = 300)
-plot(pika_pcadapt_pca, option = "screeplot")  
+plot(pika_pcadapt_pca, option = "screeplot")
 dev.off()
 print("Scree plot (K = 5) saved")
 
@@ -51,17 +52,46 @@ print("Scree plot (K = 5) saved")
 metadata <- read.table("../data/pika_10pop_metadata.txt", header = FALSE)
 pop_ids <- metadata[, 2]
 
+# Extract PCA scores and add metadata
+pika_pcadapt_pca_scores <- as.data.frame(pika_pcadapt_pca$scores)
+colnames(pika_pcadapt_pca_scores) <- paste0("PC", 1:ncol(pika_pcadapt_pca_scores))
+pika_pcadapt_pca_scores$Population <- pop_ids
+
+# Separate location and time from population labels
+pika_pcadapt_pca_scores$Site <- sub("_[HM]$", "", pika_pcadapt_pca_scores$Population)
+pika_pcadapt_pca_scores$Time <- sub("^.*_", "", pika_pcadapt_pca_scores$Population)
+
 # Score plot for the first two PCs
 png("pcadapt-results/pika_pcadapt_projection1v2.png", width = 10, height = 10, units = "in", res = 300)
-plot(pika_pcadapt_pca, option = "scores", i = 1, j = 2, pop = pop_ids)
+ggplot(pika_pcadapt_pca_scores, aes(x = PC1, y = PC2, color = Site, shape = Time)) +
+    geom_point(size = 3) +
+    theme_bw() +
+    theme(
+        plot.title = element_text(hjust = 0.5, size = 18),
+        axis.title = element_text(size = 16),
+        axis.text = element_text(size = 14),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14),
+        legend.position = "right"
+    )
 dev.off()
 print("Score plot (PC1 vs. PC2) saved")
 
-# Score plot for the fourth and fifth PCs
-png("pcadapt-results/pika_pcadapt_projection4v5.png", width = 10, height = 10, units = "in", res = 300)
-plot(pika_pcadapt_pca, option = "scores", i = 4, j = 5, pop = pop_ids)
+# Score plot for the third and fourth PCs
+png("pcadapt-results/pika_pcadapt_projection3v4.png", width = 10, height = 10, units = "in", res = 300)
+ggplot(pika_pcadapt_pca_scores, aes(x = PC3, y = PC4, color = Site, shape = Time)) +
+    geom_point(size = 3) +
+    theme_bw() +
+    theme(
+        plot.title = element_text(hjust = 0.5, size = 18),
+        axis.title = element_text(size = 16),
+        axis.text = element_text(size = 14),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14),
+        legend.position = "right"
+    )
 dev.off()
-print("Score plot (PC4 vs. PC5) saved")
+print("Score plot (PC3 vs. PC4) saved")
 
 # Manhattan plot: visualize p-values across the genome
 png("pcadapt-results/pika_pcadapt_manhattan.png", width = 10, height = 10, units = "in", res = 300)
@@ -101,3 +131,9 @@ length(outliers)
 write.table(outliers, file = "pcadapt-results/pika_pcadapt_outliers.txt", 
             row.names = FALSE, col.names = FALSE)
 print("Outliers saved to pika_pcadapt_outliers.txt")
+
+# Associate outliers with PCs
+snp_pc <- get.pc(pika_pcadapt_pca, outliers)
+write.table(snp_pc, file = "pcadapt-results/pika_pcadapt_snp_pc.txt", 
+            row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+print("SNP-PC association saved to pika_pcadapt_snp_pc.txt")

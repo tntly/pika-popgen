@@ -46,6 +46,7 @@ cd $DIR/pcadapt
 # Run pcadapt analysis
 # --------------------------- #
 echo "Starting pcadapt analysis in R..."
+Rscript old_pcadapt.R
 Rscript pcadapt.R
 
 # --------------------------- #
