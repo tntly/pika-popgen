@@ -123,6 +123,10 @@ awk 'FNR == NR {a[$2]; next} (($4) in a)' \
 # --------------------------- #
 # Identify outlier SNP IDs for vpdmin_min from GEA 2
 # --------------------------- #
+# Calculate the number of outliers for ppt_sum from GEA 2
+echo "Calculating the number of outliers for ppt_sum from GEA 2..."
+cat baypass-results/pika_baypass_gea2_BF25.txt | awk '$1 == 1' | wc -l
+
 # Filter outliers for vpdmin_min
 echo "Filtering outliers for vpdmin_min from GEA 2..."
 cat baypass-results/pika_baypass_gea2_BF25.txt | \
@@ -134,4 +138,7 @@ awk 'FNR == NR {a[$2]; next} (($4) in a)' \
   baypass-results/pika_baypass_gea2_BF25_vpdmin_min.txt \
   $DIR/data/pika_10pop_SNPs.txt | \
   cut -f 3 > baypass-results/pika_baypass_gea2_vpdmin_min_outlier_SNPIDs.txt
-  
+
+# Caculate the number of outliers for winter_tmax_max from GEA 2
+echo "Calculating the number of outliers for winter_tmax_max from GEA 2..."
+cat baypass-results/pika_baypass_gea2_BF25.txt | awk '$1 == 3' | wc -l
