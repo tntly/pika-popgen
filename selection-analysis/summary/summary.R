@@ -15,6 +15,8 @@
 # Environment setup
 # --------------------------- #
 library(UpSetR)
+library(ggplot2)
+library(ComplexUpset)
 
 # --------------------------- #
 # Load outlier SNP IDs
@@ -33,8 +35,25 @@ all_outliers <- list(
   RDA = rda
 )
 
+# Union of all SNPs detected by either pcdapt or BayeScan
+pcadapt_bayescan_union <- sort(unique(c(pcadapt, bayescan)))
+# Union of all SNPs detected by BayPass or RDA
+baypass_rda_union <- sort(unique(c(baypass, rda)))
+
+# Logical presence/absence table for UpSetR
+upset_data_pcadapt_bayescan <- data.frame(
+  SNP = pcadapt_bayescan_union,
+  pcadapt = pcadapt_bayescan_union %in% pcadapt,
+  BayeScan = pcadapt_bayescan_union %in% bayescan
+)
+upset_data_baypass_rda <- data.frame(
+  SNP = baypass_rda_union,
+  BayPass = baypass_rda_union %in% baypass,
+  RDA = baypass_rda_union %in% rda
+)
+
 # --------------------------- #
-# Visualization: UpSet plot
+# Visualization
 # --------------------------- #
 # Generate an UpSet plot showing overlaps of outliers across all methods
 png("summary-results/all_outliers_UpSetplot.png", width = 8, height = 10, units = "in", res = 300)
@@ -52,6 +71,70 @@ upset(
 )
 dev.off()
 print("Saved: all_outliers_UpSetplot.png")
+
+# Generate a more complex UpSet plot for pcadapt vs BayeScan
+png("summary-results/pcadapt_bayescan_UpSetplot.png", width = 10, height = 10, units = "in", res = 300)
+(
+upset(
+  upset_data_pcadapt_bayescan,
+  intersect = c("pcadapt", "BayeScan"),
+  base_annotations = list(
+    "Intersection size" = (
+      intersection_size(
+        text = list(size = 5),
+        mapping = aes(fill = "bars_color")
+      ) +
+      ylab("Number of Outlier SNPs") +
+      scale_fill_manual(values = c("bars_color" = "steelblue"), guide = "none") +
+      theme(
+        axis.title.y = element_text(size = 16),
+        axis.text.y = element_text(size = 14)
+      )
+    )
+  ),
+  name = "Outlier Methods",
+  set_sizes = FALSE
+) +
+  theme(
+    axis.title.x = element_text(size = 16),
+    axis.text.x = element_text(size = 14),
+    axis.text.y = element_text(size = 14)
+  )
+)
+dev.off()
+print("Saved: pcadapt_bayescan_UpSetplot.png")
+
+# Generate a more complex UpSet plot for BayPass vs RDA
+png("summary-results/baypass_rda_UpSetplot.png", width = 10, height = 10, units = "in", res = 300)
+(
+upset(
+  upset_data_baypass_rda,
+  intersect = c("BayPass", "RDA"),
+  base_annotations = list(
+    "Intersection size" = (
+      intersection_size(
+        text = list(size = 5),
+        mapping = aes(fill = "bars_color")
+      ) +
+      ylab("Number of Outlier SNPs") +
+      scale_fill_manual(values = c("bars_color" = "steelblue"), guide = "none") +
+      theme(
+        axis.title.y = element_text(size = 16),
+        axis.text.y = element_text(size = 14)
+      )
+    )
+  ),
+  name = "Outlier Methods",
+  set_sizes = FALSE
+) +
+  theme(
+    axis.title.x = element_text(size = 16),
+    axis.text.x = element_text(size = 14),
+    axis.text.y = element_text(size = 14)
+  )
+)
+dev.off()
+print("Saved: baypass_rda_UpSetplot.png")
 
 # --------------------------- #
 # Identify overlapping outliers
